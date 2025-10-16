@@ -19,12 +19,5 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.stories.tsx",
-    "**/*.test.tsx",
-    "src/main.tsx",
-    "src/App.tsx"
-  ]
+  "exclude": ["node_modules", "dist", "**/*.stories.tsx", "**/*.test.tsx", "src/main.tsx", "src/App.tsx"]
 }

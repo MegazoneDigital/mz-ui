@@ -40,10 +40,7 @@ npm install react react-dom
 
 ```js
 export default {
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@mz-ui/core/dist/**/*.{js,cjs}',
-  ],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './node_modules/@mz-ui/core/dist/**/*.{js,cjs}'],
   theme: {
     extend: {},
   },
@@ -152,22 +149,13 @@ npx shadcn@latest add dropdown-menu
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 
-interface NewComponentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface NewComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'outline';
 }
 
-const NewComponent = React.forwardRef<HTMLDivElement, NewComponentProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn('base-classes', className)}
-        {...props}
-      />
-    );
-  }
-);
+const NewComponent = React.forwardRef<HTMLDivElement, NewComponentProps>(({ className, variant = 'default', ...props }, ref) => {
+  return <div ref={ref} className={cn('base-classes', className)} {...props} />;
+});
 NewComponent.displayName = 'NewComponent';
 
 export { NewComponent };
@@ -268,21 +256,25 @@ git push --tags
 ## 🎯 개발 원칙
 
 ### 타입 안정성
+
 - 모든 props에 TypeScript 타입 정의
 - `React.forwardRef` 사용으로 ref 전달 지원
 - Generic 타입 적극 활용
 
 ### 접근성 (a11y)
+
 - Radix UI Primitive 활용
 - ARIA 속성 적절히 사용
 - 키보드 내비게이션 지원
 
 ### 스타일링
+
 - Tailwind CSS 유틸리티 클래스
 - `cn()` 함수로 조건부 클래스 병합
 - CSS 변수로 테마 커스터마이징
 
 ### 재사용성
+
 - Props로 다양한 변형 지원
 - `className` prop으로 확장 가능
 - Composition 패턴 활용
@@ -302,9 +294,7 @@ describe('NewComponent', () => {
   });
 
   it('applies custom className', () => {
-    const { container } = render(
-      <NewComponent className="custom">Test</NewComponent>
-    );
+    const { container } = render(<NewComponent className="custom">Test</NewComponent>);
     expect(container.firstChild).toHaveClass('custom');
   });
 });
@@ -319,6 +309,7 @@ describe('NewComponent', () => {
 ```
 
 **Type:**
+
 - `feat`: 새 기능
 - `fix`: 버그 수정
 - `docs`: 문서 변경
@@ -328,6 +319,7 @@ describe('NewComponent', () => {
 - `chore`: 빌드/설정 변경
 
 **Example:**
+
 ```
 feat: Button 컴포넌트에 loading state 추가
 

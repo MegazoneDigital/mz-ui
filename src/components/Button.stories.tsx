@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Plus, Download, Heart, Star, Mail } from 'lucide-react';
+import { Download, Heart, Mail, Plus, Star } from 'lucide-react';
 
 import { Button } from './Button';
 
@@ -18,14 +18,7 @@ const meta = {
   argTypes: {
     variant: {
       control: { type: 'select' },
-      options: [
-        'default',
-        'destructive',
-        'outline',
-        'secondary',
-        'ghost',
-        'link',
-      ],
+      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
       description: 'The variant of the button',
     },
     size: {
@@ -35,8 +28,7 @@ const meta = {
     },
     asChild: {
       control: { type: 'boolean' },
-      description:
-        'Change the default rendered element for the one passed as a child',
+      description: 'Change the default rendered element for the one passed as a child',
     },
     disabled: {
       control: { type: 'boolean' },
@@ -271,22 +263,13 @@ export const CustomColors: Story = {
       <div>
         <h3 className="mb-3 text-lg font-semibold">Gradient Backgrounds</h3>
         <div className="flex flex-wrap gap-3">
-          <Button
-            backgroundColor="linear-gradient(45deg, #ff6b6b, #ffd93d)"
-            textColor="white"
-          >
+          <Button backgroundColor="linear-gradient(45deg, #ff6b6b, #ffd93d)" textColor="white">
             Gradient Button
           </Button>
-          <Button
-            backgroundColor="linear-gradient(135deg, #667eea, #764ba2)"
-            textColor="white"
-          >
+          <Button backgroundColor="linear-gradient(135deg, #667eea, #764ba2)" textColor="white">
             Purple Gradient
           </Button>
-          <Button
-            backgroundColor="linear-gradient(90deg, #00d2ff, #3a7bd5)"
-            textColor="white"
-          >
+          <Button backgroundColor="linear-gradient(90deg, #00d2ff, #3a7bd5)" textColor="white">
             Blue Gradient
           </Button>
         </div>
@@ -304,11 +287,7 @@ export const CustomColors: Story = {
           <Button backgroundColor="#000000" textColor="white">
             Pure Black
           </Button>
-          <Button
-            backgroundColor="#ffffff"
-            textColor="#000000"
-            style={{ border: '1px solid #e5e7eb' }}
-          >
+          <Button backgroundColor="#ffffff" textColor="#000000" style={{ border: '1px solid #e5e7eb' }}>
             Pure White
           </Button>
         </div>

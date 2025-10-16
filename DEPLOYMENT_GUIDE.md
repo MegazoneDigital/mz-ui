@@ -48,6 +48,7 @@ npm login
 ```
 
 로그인 시 입력 항목:
+
 - Username
 - Password
 - Email
@@ -72,6 +73,7 @@ pnpm version 1.0.0
 ```
 
 `pnpm version` 명령어는:
+
 - `package.json`의 버전 업데이트
 - Git 커밋 생성 (`v1.0.0` 형식)
 - Git 태그 생성
@@ -323,4 +325,3 @@ npm login
 - [NPM Publishing Guide](https://docs.npmjs.com/cli/v10/using-npm/developers)
 - [Semantic Versioning](https://semver.org/)
 - [NPM 2FA](https://docs.npmjs.com/about-two-factor-authentication)
-

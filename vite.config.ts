@@ -1,14 +1,11 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { UserConfig } from 'vite';
+import { defineConfig } from 'vite';
 
-const dirname =
-  typeof __dirname !== 'undefined'
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url));
+const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig(async ({ mode }) => {
@@ -24,8 +21,7 @@ export default defineConfig(async ({ mode }) => {
         entry: path.resolve(dirname, 'src/index.ts'),
         name: 'MzUI',
         formats: ['es', 'cjs'],
-        fileName: (format: string) =>
-          `index.${format === 'es' ? 'js' : 'cjs'}`,
+        fileName: (format: string) => `index.${format === 'es' ? 'js' : 'cjs'}`,
       },
       rollupOptions: {
         external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -48,9 +44,7 @@ export default defineConfig(async ({ mode }) => {
 
   // Storybook 테스트 설정은 테스트 모드에서만 로드
   if (mode === 'test') {
-    const { storybookTest } = await import(
-      '@storybook/addon-vitest/vitest-plugin'
-    );
+    const { storybookTest } = await import('@storybook/addon-vitest/vitest-plugin');
     (config as any).test = {
       projects: [
         {

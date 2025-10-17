@@ -1,2 +1,3 @@
 export { Button, buttonVariants } from './Button';
 export type { ButtonProps } from './Button';
+export { cn } from '../utils/cn';

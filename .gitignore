@@ -28,3 +28,9 @@ storybook-static
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Package build output
+dist/
+
+# npm pack files
+*.tgz

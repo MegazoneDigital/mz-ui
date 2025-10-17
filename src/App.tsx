@@ -1,5 +1,11 @@
+import { Button } from './components';
+
 function App() {
-  return <div>App</div>;
+  return (
+    <div>
+      <Button variant="destructive">Click m22e</Button>
+    </div>
+  );
 }
 
 export default App;

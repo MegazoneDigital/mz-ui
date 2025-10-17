@@ -1,6 +1,6 @@
-# @mz-ui/storybook
+# Storybook
 
-MZ UI 디자인 시스템의 Storybook 문서 사이트입니다.
+MZ UI 디자인 시스템 문서 사이트
 
 ## 실행
 
@@ -8,10 +8,17 @@ MZ UI 디자인 시스템의 Storybook 문서 사이트입니다.
 pnpm dev
 ```
 
-http://localhost:6006 에서 확인할 수 있습니다.
+http://localhost:6006
 
 ## 빌드
 
 ```bash
 pnpm build
 ```
+
+정적 파일: `storybook-static/`
+
+## 설정
+
+- `.storybook/main.ts` - 메인 설정
+- `.storybook/preview.ts` - 프리뷰 설정

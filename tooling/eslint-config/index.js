@@ -5,6 +5,22 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+export const prettierConfig = {
+  semi: true,
+  tabWidth: 2,
+  printWidth: 160,
+  singleQuote: true,
+  trailingComma: 'es5',
+  jsxSingleQuote: false,
+  bracketSpacing: true,
+  arrowParens: 'avoid',
+  endOfLine: 'lf',
+  useTabs: false,
+  bracketSameLine: false,
+  quoteProps: 'as-needed',
+  plugins: ['prettier-plugin-tailwindcss'],
+};
+
 export default tseslint.config(
   { ignores: ['dist', 'node_modules', 'storybook-static', '.turbo', '.changeset'] },
   {
@@ -33,6 +49,7 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      'prettier/prettier': ['error', prettierConfig],
     },
   }
 );

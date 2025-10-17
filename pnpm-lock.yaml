@@ -72,9 +72,6 @@ importers:
       eslint-config:
         specifier: workspace:*
         version: link:../../tooling/eslint-config
-      prettier-config:
-        specifier: workspace:*
-        version: link:../../tooling/prettier-config
       storybook:
         specifier: ^8.6.14
         version: 8.6.14(prettier@3.6.2)
@@ -130,9 +127,6 @@ importers:
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
-      prettier-config:
-        specifier: workspace:*
-        version: link:../../tooling/prettier-config
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -172,18 +166,15 @@ importers:
       globals:
         specifier: ^16.4.0
         version: 16.4.0
-      typescript-eslint:
-        specifier: ^8.45.0
-        version: 8.46.1(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)
-
-  tooling/prettier-config:
-    dependencies:
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
       prettier-plugin-tailwindcss:
         specifier: ^0.7.0
         version: 0.7.0(prettier@3.6.2)
+      typescript-eslint:
+        specifier: ^8.45.0
+        version: 8.46.1(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)
 
   tooling/typescript-config: {}
 

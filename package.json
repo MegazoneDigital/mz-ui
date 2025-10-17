@@ -4,16 +4,12 @@
   "private": true,
   "description": "MZ UI Design System",
   "scripts": {
-    "build": "turbo build",
     "dev": "turbo dev",
+    "build": "turbo build",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "type-check": "turbo type-check",
     "clean": "turbo clean && rm -rf node_modules",
     "changeset": "changeset",
-    "version": "changeset version",
     "release": "turbo build && changeset publish"
   },
   "author": "Megazone ICT",

@@ -1,9 +1,0 @@
-node_modules
-dist
-build
-storybook-static
-.turbo
-coverage
-*.css
-*.config.js
-*.config.ts

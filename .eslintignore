@@ -1,10 +1,9 @@
-# Ignore CSS files
+node_modules
+dist
+build
+storybook-static
+.turbo
+coverage
 *.css
-
-# Ignore build outputs  
-dist/
-build/
-storybook-static/
-
-# Ignore node_modules
-node_modules/
+*.config.js
+*.config.ts

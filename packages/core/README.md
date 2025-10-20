@@ -1,6 +1,19 @@
 # @mz-ui/core
 
+[![npm version](https://img.shields.io/npm/v/@mz-ui/core.svg)](https://www.npmjs.com/package/@mz-ui/core)
+[![npm downloads](https://img.shields.io/npm/dm/@mz-ui/core.svg)](https://www.npmjs.com/package/@mz-ui/core)
+[![license](https://img.shields.io/npm/l/@mz-ui/core.svg)](https://github.com/MegazoneDigital/mz-ui/blob/main/LICENSE)
+
 MZ UI 디자인 시스템의 핵심 패키지입니다. 기본 컴포넌트, 레이아웃, 유틸리티를 제공합니다.
+
+## 특징
+
+- ⚡️ **React 18+** - 최신 React 기능 지원
+- 🎨 **Tailwind CSS** - 유틸리티 우선 스타일링
+- 🔧 **TypeScript** - 완전한 타입 지원
+- 📦 **Tree-shakeable** - 최적화된 번들 크기
+- 🌗 **Dark Mode** - 다크 모드 지원
+- ♿️ **접근성** - Radix UI 기반의 접근 가능한 컴포넌트
 
 ## 설치
 

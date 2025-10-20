@@ -1,0 +1,42 @@
+# Source files
+src/
+*.stories.tsx
+*.test.tsx
+*.test.ts
+*.spec.tsx
+*.spec.ts
+
+# Config files
+tsconfig.json
+vite.config.ts
+eslint.config.js
+postcss.config.js
+components.json
+tailwind.config.*
+.npmrc
+.npmignore
+
+# Build cache
+.turbo/
+
+# Development
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+
+# Documentation (README.md, LICENSE, CHANGELOG.md는 package.json files에서 명시적으로 포함)
+DEVELOPER.md
+docs/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

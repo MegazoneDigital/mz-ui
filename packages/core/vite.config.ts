@@ -30,10 +30,14 @@ export default defineConfig({
           if (assetInfo.name?.endsWith('.css')) return 'style.css';
           return assetInfo.name || '';
         },
+        preserveModules: false,
+        exports: 'named',
       },
     },
     cssCodeSplit: false,
     sourcemap: true,
     emptyOutDir: true,
+    minify: false,
+    target: 'es2020',
   },
 });

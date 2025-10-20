@@ -1,6 +1,6 @@
 {
   "name": "@mz-ui/core",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "MZ UI Core - 기본 컴포넌트, 레이아웃, 유틸리티",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -12,11 +12,19 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/style.css"
+    "./styles.css": {
+      "default": "./dist/style.css"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css"
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
@@ -24,21 +32,40 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo node_modules"
+    "clean": "rm -rf dist .turbo node_modules",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "react",
     "ui",
     "components",
     "design-system",
-    "tailwind",
-    "typescript"
+    "tailwindcss",
+    "shadcn",
+    "mz-ui",
+    "megazone"
   ],
   "author": "Megazone ICT",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MegazoneDigital/mz-ui.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/MegazoneDigital/mz-ui/issues"
+  },
+  "homepage": "https://github.com/MegazoneDigital/mz-ui/tree/main/packages/core#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "peerDependencies": {
-    "react": ">=18.0.0 <19.0.0",
-    "react-dom": ">=18.0.0 <19.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

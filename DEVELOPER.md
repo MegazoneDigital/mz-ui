@@ -7,7 +7,7 @@ MZ UI 모노레포 개발 환경 설정 및 워크플로우 가이드
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/megazone/mz-ui.git
+git clone https://github.com/MegazoneDigital/mz-ui.git
 cd mz-ui
 ```
 

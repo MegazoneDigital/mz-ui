@@ -1,8 +1,14 @@
 {
   "extends": "typescript-config/react.json",
   "compilerOptions": {
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [".storybook/**/*", "../packages/*/src/**/*.stories.@(ts|tsx)"],
+  "include": [".storybook/**/*", "src/**/*", "stories/**/*"],
   "exclude": ["node_modules"]
 }

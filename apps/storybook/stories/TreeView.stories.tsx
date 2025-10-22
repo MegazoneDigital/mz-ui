@@ -13,8 +13,8 @@ import {
   TrashIcon,
   VideoIcon,
 } from 'lucide-react';
-import React from 'react';
 
+import React from 'react';
 import { TreeDataItem, TreeView } from '../src/components/ui/treeView';
 
 const meta = {
@@ -548,100 +548,6 @@ export const WithActions: Story = {
   },
 };
 
-// 드래그 앤 드롭 예시
-const DragDropExample = () => {
-  const [treeData] = React.useState<TreeDataItem[]>([
-    {
-      id: '1',
-      name: '할 일',
-      icon: FolderIcon,
-      draggable: true,
-      children: [
-        { id: '1-1', name: '프로젝트 기획', icon: FileTextIcon, draggable: true },
-        { id: '1-2', name: '디자인 리뷰', icon: FileTextIcon, draggable: true },
-      ],
-    },
-    {
-      id: '2',
-      name: '진행 중',
-      icon: FolderIcon,
-      draggable: true,
-      children: [{ id: '2-1', name: '개발 진행', icon: CodeIcon, draggable: true }],
-    },
-    {
-      id: '3',
-      name: '완료',
-      icon: FolderIcon,
-      draggable: true,
-      children: [],
-    },
-  ]);
-
-  const handleDragDrop = (source: TreeDataItem, target: TreeDataItem) => {
-    console.log(`${source.name}을(를) ${target.name}(으)로 이동`);
-    // 실제 구현에서는 여기서 데이터를 업데이트합니다
-  };
-
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600 dark:text-gray-400">아이템을 드래그해서 다른 폴더로 이동시킬 수 있습니다.</p>
-      <TreeView data={treeData} defaultNodeIcon={FolderIcon} defaultLeafIcon={FileTextIcon} onDocumentDrag={handleDragDrop} />
-    </div>
-  );
-};
-
-export const DragAndDrop: Story = {
-  args: { data: [] },
-  render: () => <DragDropExample />,
-  parameters: {
-    docs: {
-      description: {
-        story: '드래그 앤 드롭 기능이 있는 트리뷰입니다. 칸반 보드나 파일 관리에 유용합니다.',
-      },
-      source: {
-        language: 'tsx',
-        code: `const DragDropExample = () => {
-  const [treeData, setTreeData] = React.useState([
-    {
-      id: '1',
-      name: '할 일',
-      icon: FolderIcon,
-      draggable: true,
-      children: [
-        { id: '1-1', name: '프로젝트 기획', icon: FileTextIcon, draggable: true },
-        { id: '1-2', name: '디자인 리뷰', icon: FileTextIcon, draggable: true },
-      ],
-    },
-    {
-      id: '2',
-      name: '진행 중',
-      icon: FolderIcon,
-      draggable: true,
-      children: [
-        { id: '2-1', name: '개발 진행', icon: CodeIcon, draggable: true },
-      ],
-    },
-  ]);
-
-  const handleDragDrop = (source: TreeDataItem, target: TreeDataItem) => {
-    console.log(source.name + '을(를) ' + target.name + '(으)로 이동');
-    // 데이터 업데이트 로직
-  };
-
-  return (
-    <TreeView
-      data={treeData}
-      defaultNodeIcon={FolderIcon}
-      defaultLeafIcon={FileTextIcon}
-      onDocumentDrag={handleDragDrop}
-    />
-  );
-};`,
-      },
-    },
-  },
-};
-
 // 선택된 아이템이 있는 예시
 export const WithSelectedItem: Story = {
   args: {
@@ -695,4 +601,133 @@ export const ExpandAll: Story = {
       },
     },
   },
+};
+
+// 스토리북 예시 컴포넌트
+export const DragDropExample = () => {
+  const [treeData, setTreeData] = React.useState<TreeDataItem[]>([
+    {
+      id: '1',
+      name: '할 일',
+      icon: FolderIcon,
+      draggable: true,
+      droppable: true, // [FIX] 폴더는 드롭 대상이어야 함
+      children: [
+        { id: '1-1', name: '프로젝트 기획', icon: FileTextIcon, draggable: true },
+        { id: '1-2', name: '디자인 리뷰', icon: FileTextIcon, draggable: true },
+      ],
+    },
+    {
+      id: '2',
+      name: '진행 중',
+      icon: FolderIcon,
+      draggable: true,
+      droppable: true, // [FIX] 폴더는 드롭 대상이어야 함
+      children: [{ id: '2-1', name: '개발 진행', icon: CodeIcon, draggable: true }],
+    },
+    {
+      id: '3',
+      name: '완료',
+      icon: FolderIcon,
+      draggable: true,
+      droppable: true, // [FIX] 폴더는 드롭 대상이어야 함
+      children: [],
+    },
+  ]);
+
+  const [dragHistory, setDragHistory] = React.useState<string[]>([]);
+
+  // --- DND 로직을 위한 헬퍼 함수 (불변성 유지) ---
+  function removeNode(nodes: TreeDataItem[], id: string): TreeDataItem[] {
+    return nodes
+      .filter(node => node.id !== id)
+      .map(node => {
+        if (node.children) {
+          return { ...node, children: removeNode(node.children, id) };
+        }
+        return node;
+      });
+  }
+
+  function addNode(nodes: TreeDataItem[], targetId: string, nodeToAdd: TreeDataItem): TreeDataItem[] {
+    // 타겟이 루트('parent_div')인 경우
+    if (targetId === '' || targetId === 'parent_div') {
+      return [...nodes, nodeToAdd];
+    }
+
+    // 타겟이 특정 노드인 경우
+    return nodes.map(node => {
+      if (node.id === targetId) {
+        // droppable한 노드(폴더)에만 자식으로 추가
+        if (node.children) {
+          return {
+            ...node,
+            children: [...node.children, nodeToAdd],
+          };
+        }
+      }
+      if (node.children) {
+        return { ...node, children: addNode(node.children, targetId, nodeToAdd) };
+      }
+      return node;
+    });
+  }
+  // --- 헬퍼 함수 끝 ---
+
+  // 3. [FIX] 불변성을 지키는 헬퍼 함수를 사용하도록 핸들러 수정
+  const handleDragDrop = (source: TreeDataItem, target: TreeDataItem) => {
+    // 스스로에게 드롭 방지
+    if (source.id === target.id) return;
+
+    // 리프(파일)에게 드롭 방지 (droppable 속성이 없거나 false인 경우)
+    // target.name === 'parent_div'는 루트 드롭이므로 허용
+    if (target.name !== 'parent_div' && !target.droppable) {
+      console.log(`드롭 대상(${target.name})은 droppable하지 않습니다.`);
+      return;
+    }
+
+    const targetName = target.name === 'parent_div' ? '루트' : target.name;
+    const logMessage = `${source.name}을(를) ${targetName}(으)로 이동`;
+
+    setDragHistory(prev => [...prev.slice(-4), logMessage]);
+
+    setTreeData(currentData => {
+      // 1. 소스 노드 제거
+      const dataWithoutSource = removeNode(currentData, source.id);
+      // 2. 타겟에 소스 노드 추가
+      const newData = addNode(dataWithoutSource, target.id || 'parent_div', source);
+      return newData;
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">🎯 아이템을 드래그해서 다른 폴더로 이동시킬 수 있습니다.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">💡 팁: 트리 하단 영역으로 드래그하면 루트로 이동됩니다.</p>
+      </div>
+
+      <TreeView
+        data={treeData}
+        defaultNodeIcon={FolderIcon} // 스토리에서 import한 아이콘 전달
+        defaultLeafIcon={FileTextIcon} // 스토리에서 import한 아이콘 전달
+        onDocumentDrag={handleDragDrop}
+      />
+
+      {/* 드래그 히스토리 표시 */}
+      {dragHistory.length > 0 && (
+        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">📝 이동 기록</h4>
+          <div className="space-y-1">
+            {dragHistory.map((log, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                <span className="text-blue-500">#{index + 1}</span>
+                <span>{log}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };

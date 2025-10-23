@@ -15,7 +15,127 @@ import {
 } from 'lucide-react';
 
 import React from 'react';
+import { CustomDocsPage } from '../src/components/CustomDocsPage';
 import { TreeDataItem, TreeView } from '../src/components/ui/treeView';
+
+const treeViewImplementationCode = `'use client';
+
+import { cn } from '@/lib/utils';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import { cva } from 'class-variance-authority';
+import { ChevronRight, FileIcon, FileJson, FolderIcon, GripVertical, Image, Type } from 'lucide-react';
+import React from 'react';
+
+// [스타일링 가이드 - 1. 핵심 아이템 스타일 (CVA)]
+const treeVariants = cva('group relative flex items-center gap-3 w-full px-4 py-5 text-base cursor-pointer transition-colors');
+const selectedTreeVariants = cva('bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50');
+const dragOverVariants = cva('bg-blue-100 text-blue-800 dark:bg-blue-800/50 dark:text-blue-200');
+
+export interface TreeDataItem {
+  id: string;
+  name: string;
+  type?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  selectedIcon?: React.ComponentType<{ className?: string }>;
+  openIcon?: React.ComponentType<{ className?: string }>;
+  children?: TreeDataItem[];
+  actions?: React.ReactNode;
+  onClick?: () => void;
+  draggable?: boolean;
+  droppable?: boolean;
+  disabled?: boolean;
+}
+
+type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
+  data: TreeDataItem[] | TreeDataItem;
+  initialSelectedItemId?: string;
+  onSelectChange?: (item: TreeDataItem | undefined) => void;
+  expandAll?: boolean;
+  defaultNodeIcon?: React.ComponentType<{ className?: string }>;
+  defaultLeafIcon?: React.ComponentType<{ className?: string }>;
+  onDocumentDrag?: (sourceItem: TreeDataItem, targetItem: TreeDataItem) => void;
+};
+
+// [최적화: new Map을 사용한 부모 맵 생성 및 탐색]
+function buildParentMap(items: TreeDataItem[], parentId?: string, map?: Map<string, string>): Map<string, string> {
+  if (!map) map = new Map();
+  for (const item of items) {
+    if (parentId) map.set(item.id, parentId);
+    if (item.children) buildParentMap(item.children, item.id, map);
+  }
+  return map;
+}
+
+const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
+  ({ data, initialSelectedItemId, onSelectChange, expandAll, defaultLeafIcon, defaultNodeIcon, className, onDocumentDrag, ...props }, ref) => {
+    const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(initialSelectedItemId);
+    const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
+
+    // [최적화: Set을 사용하여 중복 없는 expandedId 관리/탐색]
+    const [expandedItemIds, setExpandedItemIds] = React.useState<string[]>(() => {
+      const dataArray = Array.isArray(data) ? data : [data];
+      const idsSet = new Set<string>();
+
+      function collectAllNodeIds(items: TreeDataItem[]) {
+        items.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            idsSet.add(item.id);
+            collectAllNodeIds(item.children);
+          }
+        });
+      }
+
+      if (expandAll) {
+        collectAllNodeIds(dataArray);
+      } else if (initialSelectedItemId) {
+        // 초기 선택된 아이템까지의 경로 확장
+        function findPathToTarget(items: TreeDataItem[], targetId: string): boolean {
+          for (const item of items) {
+            if (item.id === targetId) return true;
+            if (item.children) {
+              idsSet.add(item.id);
+              if (findPathToTarget(item.children, targetId)) return true;
+              idsSet.delete(item.id);
+            }
+          }
+          return false;
+        }
+        findPathToTarget(dataArray, initialSelectedItemId);
+      }
+
+      return Array.from(idsSet);
+    });
+
+    // 최적화: 부모 탐색을 위해 Map 캐싱
+    const parentMap = React.useMemo(() => {
+      const dataArray = Array.isArray(data) ? data : [data];
+      return buildParentMap(dataArray);
+    }, [data]);
+
+    // ... 나머지 구현부 (handleSelectChange, handleDragStart, handleDrop 등)
+    // TreeItem, TreeNode, TreeLeaf, AccordionTrigger, AccordionContent, TreeIcon, TreeActions 컴포넌트들 포함
+
+    return (
+      <div className={cn('relative overflow-hidden bg-white dark:bg-gray-900', className)}>
+        <TreeItem
+          data={data}
+          ref={ref}
+          selectedItemId={selectedItemId}
+          handleSelectChange={handleSelectChange}
+          expandedItemIds={expandedItemIds}
+          defaultLeafIcon={defaultLeafIcon || FileIcon}
+          defaultNodeIcon={defaultNodeIcon || FolderIcon}
+          handleDragStart={handleDragStart}
+          handleDrop={handleDrop}
+          draggedItem={draggedItem}
+          {...props}
+        />
+      </div>
+    );
+  }
+);
+
+export { TreeView };`;
 
 const meta = {
   title: 'Components/TreeView',
@@ -26,27 +146,23 @@ const meta = {
       description: {
         component: `계층적 데이터를 표시하는 트리뷰 컴포넌트입니다. Strapi 스타일의 깔끔한 디자인을 적용했습니다.
 
-## 컴포넌트 구현
-
-TreeView 컴포넌트는 파일 탐색기, 네비게이션 메뉴, 조직도 등에 사용할 수 있습니다:
-
-### 주요 컴포넌트
-- \`TreeView\` - 트리 구조를 렌더링하는 메인 컴포넌트
-- \`TreeNode\` - 하위 노드가 있는 폴더형 아이템
-- \`TreeLeaf\` - 최종 노드인 파일형 아이템
-- \`TreeIcon\` - 아이템 타입에 따른 아이콘 표시
-- \`TreeActions\` - 호버 시 표시되는 액션 버튼들
-
-### 주요 기능
+## 주요 기능
 - **계층적 구조**: 무제한 중첩 가능한 트리 구조
-- **선택 상태**: 단일 아이템 선택 및 상태 관리
+- **선택 상태**: 단일 아이템 선택 및 상태 관리  
 - **확장/축소**: 폴더 노드의 열기/닫기 기능
 - **드래그 앤 드롭**: 아이템 간 이동 기능
 - **커스텀 아이콘**: 아이템별 개별 아이콘 설정
 - **액션 버튼**: 호버 시 표시되는 컨텍스트 액션
-- **비활성화**: 개별 아이템 비활성화 지원
-        `,
+- **비활성화**: 개별 아이템 비활성화 지원`,
       },
+      page: () => (
+        <CustomDocsPage
+          componentName="TreeView"
+          description="계층적 데이터를 표시하는 트리뷰 컴포넌트입니다. Strapi 스타일의 깔끔한 디자인을 적용했습니다."
+          installationDeps={['@radix-ui/react-accordion', 'class-variance-authority', 'clsx', 'tailwind-merge', 'lucide-react']}
+          implementationCode={treeViewImplementationCode}
+        />
+      ),
     },
   },
   tags: ['autodocs'],
@@ -74,7 +190,198 @@ TreeView 컴포넌트는 파일 탐색기, 네비게이션 메뉴, 조직도 등
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 1. 완전한 구현코드
+// 4. 예시들
+// 기본 파일 시스템 예시
+const fileSystemData: TreeDataItem[] = [
+  {
+    id: '1',
+    name: 'src',
+    icon: FolderIcon,
+    openIcon: FolderOpenIcon,
+    children: [
+      {
+        id: '1-1',
+        name: 'components',
+        icon: FolderIcon,
+        openIcon: FolderOpenIcon,
+        children: [
+          { id: '1-1-1', name: 'Button.tsx', icon: CodeIcon },
+          { id: '1-1-2', name: 'Input.tsx', icon: CodeIcon },
+          { id: '1-1-3', name: 'Modal.tsx', icon: CodeIcon },
+        ],
+      },
+      {
+        id: '1-2',
+        name: 'pages',
+        icon: FolderIcon,
+        openIcon: FolderOpenIcon,
+        children: [
+          { id: '1-2-1', name: 'index.tsx', icon: FileTextIcon },
+          { id: '1-2-2', name: 'about.tsx', icon: FileTextIcon },
+        ],
+      },
+      { id: '1-3', name: 'styles.css', icon: FileIcon },
+      { id: '1-4', name: 'utils.ts', icon: CodeIcon },
+    ],
+  },
+  {
+    id: '2',
+    name: 'public',
+    icon: FolderIcon,
+    openIcon: FolderOpenIcon,
+    children: [
+      {
+        id: '2-1',
+        name: 'images',
+        icon: FolderIcon,
+        openIcon: FolderOpenIcon,
+        children: [
+          { id: '2-1-1', name: 'logo.png', icon: ImageIcon },
+          { id: '2-1-2', name: 'hero.jpg', icon: ImageIcon },
+        ],
+      },
+      {
+        id: '2-2',
+        name: 'videos',
+        icon: FolderIcon,
+        openIcon: FolderOpenIcon,
+        children: [{ id: '2-2-1', name: 'intro.mp4', icon: VideoIcon }],
+      },
+    ],
+  },
+  { id: '3', name: 'package.json', icon: SettingsIcon },
+  { id: '4', name: 'README.md', icon: FileTextIcon },
+];
+
+export const FileSystem: Story = {
+  args: {
+    data: fileSystemData,
+    defaultNodeIcon: FolderIcon,
+    defaultLeafIcon: FileIcon,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: '파일 시스템 구조를 보여주는 기본 트리뷰입니다.',
+      },
+      source: {
+        language: 'tsx',
+        code: `const fileSystemData = [
+    {
+      id: '1',
+      name: 'src',
+      icon: FolderIcon,
+      openIcon: FolderOpenIcon,
+      children: [
+        {
+          id: '1-1',
+          name: 'components',
+          icon: FolderIcon,
+          openIcon: FolderOpenIcon,
+          children: [
+            { id: '1-1-1', name: 'Button.tsx', icon: CodeIcon },
+            { id: '1-1-2', name: 'Input.tsx', icon: CodeIcon },
+          ],
+        },
+      ],
+    },
+  ];
+  
+  <TreeView
+    data={fileSystemData}
+    defaultNodeIcon={FolderIcon}
+    defaultLeafIcon={FileIcon}
+  />`,
+      },
+    },
+  },
+};
+
+// 1. 설치 및 설정
+export const InstallationGuide: Story = {
+  args: { data: [] },
+  render: () => (
+    <div className="max-w-4xl space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">설치 및 설정</h3>
+
+        <div className="space-y-3">
+          <h4 className="font-medium">1. 필수 의존성 패키지 설치</h4>
+          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+            <p className="font-mono text-sm">npm install lucide-react clsx tailwind-merge</p>
+            <p className="mt-1 font-mono text-sm">또는</p>
+            <p className="font-mono text-sm">pnpm add lucide-react clsx tailwind-merge</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h4 className="font-medium">2. 프로젝트에 추가하기</h4>
+          <ul className="ml-4 space-y-1 text-sm">
+            <li>• treeView.tsx 컴포넌트를 src/components/ui/ 폴더에 복사</li>
+            <li>• utils.ts 파일을 src/lib/ 폴더에 복사</li>
+            <li>• 프로젝트에 Tailwind CSS가 설정되어 있는지 확인</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'TreeView 컴포넌트 구현을 위한 의존성 패키지 및 설정 방법입니다.',
+      },
+      source: {
+        language: 'tsx',
+        code: `// 기본 사용법
+import { TreeView } from '@/components/ui/treeView';
+
+const treeData = [
+  {
+    id: '1',
+    name: '프로젝트',
+    children: [
+      { id: '1-1', name: 'src', children: [] },
+      { id: '1-2', name: 'package.json' },
+    ],
+  },
+];
+
+<TreeView data={treeData} />
+
+// 확장된 사용법
+<TreeView
+  data={treeData}
+  initialSelectedItemId="1-1"
+  expandAll={true}
+  onSelectChange={(item) => console.log('선택된 아이템:', item)}
+  onDocumentDrag={(source, target) => console.log('드래그:', source, target)}
+/>
+
+// 커스텀 아이콘
+import { FileIcon, FolderIcon } from 'lucide-react';
+
+const customData = [
+  {
+    id: '1',
+    name: '폴더',
+    icon: FolderIcon,
+    children: [
+      { id: '1-1', name: '파일.txt', icon: FileIcon },
+    ],
+  },
+];
+
+<TreeView 
+  data={customData}
+  defaultNodeIcon={FolderIcon}
+  defaultLeafIcon={FileIcon}
+/>`,
+      },
+    },
+  },
+};
+
+// 2. 완전한 구현코드
 export const TreeViewImplementation: Story = {
   args: { data: [] },
   render: () => <h3 className="mb-4 text-lg font-semibold">완전한 TreeView 구현 코드</h3>,
@@ -205,7 +512,7 @@ export { TreeView, type TreeDataItem };`,
   },
 };
 
-// 2. 유틸리티 함수
+// 3. 유틸리티 함수
 export const UtilsImplementation: Story = {
   args: { data: [] },
   render: () => <h3 className="mb-4 text-lg font-semibold">유틸리티 함수</h3>,
@@ -222,201 +529,6 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }`,
-      },
-    },
-  },
-};
-
-// 3. 설치 및 설정
-export const InstallationGuide: Story = {
-  args: { data: [] },
-  render: () => (
-    <div className="max-w-4xl space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">설치 및 설정</h3>
-
-        <div className="space-y-3">
-          <h4 className="font-medium">1. 필수 의존성 패키지 설치</h4>
-          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
-            <p className="font-mono text-sm">npm install @radix-ui/react-accordion class-variance-authority lucide-react clsx tailwind-merge</p>
-            <p className="mt-1 font-mono text-sm">또는</p>
-            <p className="font-mono text-sm">pnpm add @radix-ui/react-accordion class-variance-authority lucide-react clsx tailwind-merge</p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <h4 className="font-medium">2. 프로젝트에 추가하기</h4>
-          <ul className="ml-4 space-y-1 text-sm">
-            <li>• treeView.tsx 컴포넌트를 src/components/ui/ 폴더에 복사</li>
-            <li>• utils.ts 파일을 src/lib/ 폴더에 복사</li>
-            <li>• 프로젝트에 Tailwind CSS가 설정되어 있는지 확인</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'TreeView 컴포넌트 구현을 위한 의존성 패키지 및 설정 방법입니다.',
-      },
-      source: {
-        language: 'tsx',
-        code: `// 기본 사용법
-import { TreeView } from '@/components/ui/treeView';
-import { FolderIcon, FileIcon } from 'lucide-react';
-
-const treeData = [
-  {
-    id: '1',
-    name: '프로젝트 폴더',
-    icon: FolderIcon,
-    children: [
-      { id: '1-1', name: 'index.tsx', icon: FileIcon },
-      { id: '1-2', name: 'styles.css', icon: FileIcon },
-    ],
-  },
-];
-
-<TreeView 
-  data={treeData}
-  defaultNodeIcon={FolderIcon}
-  defaultLeafIcon={FileIcon}  
-  onSelectChange={(item) => console.log('선택된 항목:', item)}
-/>
-
-// 드래그 앤 드롭이 있는 사용법
-<TreeView 
-  data={treeData}
-  onDocumentDrag={(source, target) => {
-    console.log('드래그:', source.name, '→', target.name);
-  }}
-/>
-
-// 액션 버튼이 있는 사용법
-const dataWithActions = [
-  {
-    id: '1',
-    name: '문서',
-    actions: (
-      <div className="flex gap-1">
-        <button className="p-1 hover:bg-gray-200 rounded">
-          <EditIcon className="h-3 w-3" />
-        </button>
-        <button className="p-1 hover:bg-gray-200 rounded">
-          <TrashIcon className="h-3 w-3" />
-        </button>
-      </div>
-    ),
-  },
-];`,
-      },
-    },
-  },
-};
-
-// 4. 예시들
-// 기본 파일 시스템 예시
-const fileSystemData: TreeDataItem[] = [
-  {
-    id: '1',
-    name: 'src',
-    icon: FolderIcon,
-    openIcon: FolderOpenIcon,
-    children: [
-      {
-        id: '1-1',
-        name: 'components',
-        icon: FolderIcon,
-        openIcon: FolderOpenIcon,
-        children: [
-          { id: '1-1-1', name: 'Button.tsx', icon: CodeIcon },
-          { id: '1-1-2', name: 'Input.tsx', icon: CodeIcon },
-          { id: '1-1-3', name: 'Modal.tsx', icon: CodeIcon },
-        ],
-      },
-      {
-        id: '1-2',
-        name: 'pages',
-        icon: FolderIcon,
-        openIcon: FolderOpenIcon,
-        children: [
-          { id: '1-2-1', name: 'index.tsx', icon: FileTextIcon },
-          { id: '1-2-2', name: 'about.tsx', icon: FileTextIcon },
-        ],
-      },
-      { id: '1-3', name: 'styles.css', icon: FileIcon },
-      { id: '1-4', name: 'utils.ts', icon: CodeIcon },
-    ],
-  },
-  {
-    id: '2',
-    name: 'public',
-    icon: FolderIcon,
-    openIcon: FolderOpenIcon,
-    children: [
-      {
-        id: '2-1',
-        name: 'images',
-        icon: FolderIcon,
-        openIcon: FolderOpenIcon,
-        children: [
-          { id: '2-1-1', name: 'logo.png', icon: ImageIcon },
-          { id: '2-1-2', name: 'hero.jpg', icon: ImageIcon },
-        ],
-      },
-      {
-        id: '2-2',
-        name: 'videos',
-        icon: FolderIcon,
-        openIcon: FolderOpenIcon,
-        children: [{ id: '2-2-1', name: 'intro.mp4', icon: VideoIcon }],
-      },
-    ],
-  },
-  { id: '3', name: 'package.json', icon: SettingsIcon },
-  { id: '4', name: 'README.md', icon: FileTextIcon },
-];
-
-export const FileSystem: Story = {
-  args: {
-    data: fileSystemData,
-    defaultNodeIcon: FolderIcon,
-    defaultLeafIcon: FileIcon,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: '파일 시스템 구조를 보여주는 기본 트리뷰입니다.',
-      },
-      source: {
-        language: 'tsx',
-        code: `const fileSystemData = [
-  {
-    id: '1',
-    name: 'src',
-    icon: FolderIcon,
-    openIcon: FolderOpenIcon,
-    children: [
-      {
-        id: '1-1',
-        name: 'components',
-        icon: FolderIcon,
-        openIcon: FolderOpenIcon,
-        children: [
-          { id: '1-1-1', name: 'Button.tsx', icon: CodeIcon },
-          { id: '1-1-2', name: 'Input.tsx', icon: CodeIcon },
-        ],
-      },
-    ],
-  },
-];
-
-<TreeView
-  data={fileSystemData}
-  defaultNodeIcon={FolderIcon}
-  defaultLeafIcon={FileIcon}
-/>`,
       },
     },
   },

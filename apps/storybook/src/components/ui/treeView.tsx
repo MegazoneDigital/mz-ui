@@ -3,7 +3,6 @@
 import { cn } from '@/lib/utils';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cva } from 'class-variance-authority';
-// [FIX] 컴포넌트 내부에서 사용할 기본 아이콘 import
 import { ChevronRight, FileIcon, FileJson, FolderIcon, GripVertical, Image, Type } from 'lucide-react';
 import React from 'react';
 
@@ -12,7 +11,6 @@ const treeVariants = cva('group relative flex items-center gap-3 w-full px-4 py-
 const selectedTreeVariants = cva('bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50');
 const dragOverVariants = cva('bg-blue-100 text-blue-800 dark:bg-blue-800/50 dark:text-blue-200');
 
-// [FIX] export interface로 변경
 export interface TreeDataItem {
   id: string;
   name: string;
@@ -24,7 +22,7 @@ export interface TreeDataItem {
   actions?: React.ReactNode;
   onClick?: () => void;
   draggable?: boolean;
-  droppable?: boolean; // 폴더(노드)에 true를 설정해야 드롭이 가능합니다.
+  droppable?: boolean;
   disabled?: boolean;
 }
 
@@ -38,34 +36,30 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   onDocumentDrag?: (sourceItem: TreeDataItem, targetItem: TreeDataItem) => void;
 };
 
-// [NEW] 특정 아이템의 부모를 찾는 헬퍼 함수 (컴포넌트 외부로 이동)
-const findParentId = (items: TreeDataItem[], targetId: string, parentId?: string): string | null => {
+// [최적화: new Map을 사용한 부모 맵 생성 및 탐색]
+function buildParentMap(items: TreeDataItem[], parentId?: string, map?: Map<string, string>): Map<string, string> {
+  if (!map) map = new Map();
   for (const item of items) {
-    if (item.id === targetId) {
-      return parentId || null;
-    }
-    if (item.children) {
-      const found = findParentId(item.children, targetId, item.id);
-      if (found !== null) return found;
-    }
+    if (parentId) map.set(item.id, parentId);
+    if (item.children) buildParentMap(item.children, item.id, map);
   }
-  return null;
-};
+  return map;
+}
 
 const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
   ({ data, initialSelectedItemId, onSelectChange, expandAll, defaultLeafIcon, defaultNodeIcon, className, onDocumentDrag, ...props }, ref) => {
     const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(initialSelectedItemId);
     const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
 
-    // [NEW] expandedItemIds를 useState로 관리하여 동적 업데이트 가능하게 함
+    // [최적화: Set을 사용하여 중복 없는 expandedId 관리/탐색]
     const [expandedItemIds, setExpandedItemIds] = React.useState<string[]>(() => {
-      const ids: string[] = [];
-      const dataArray = data instanceof Array ? data : [data];
+      const dataArray = Array.isArray(data) ? data : [data];
+      const idsSet = new Set<string>();
 
       function collectAllNodeIds(items: TreeDataItem[]) {
         items.forEach(item => {
           if (item.children && item.children.length > 0) {
-            ids.push(item.id);
+            idsSet.add(item.id);
             collectAllNodeIds(item.children);
           }
         });
@@ -77,11 +71,11 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
             return true;
           }
           if (item.children) {
-            ids.push(item.id);
+            idsSet.add(item.id);
             if (findPathToTarget(item.children, targetId)) {
               return true;
             }
-            ids.pop();
+            idsSet.delete(item.id);
           }
         }
         return false;
@@ -93,18 +87,23 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
         findPathToTarget(dataArray, initialSelectedItemId);
       }
 
-      return ids;
+      return Array.from(idsSet);
     });
 
-    // [NEW] data나 expandAll이 변경될 때 expandedItemIds 업데이트
+    // [최적화: 부모 탐색을 위해 Map 캐싱]
+    const parentMap = React.useMemo(() => {
+      const dataArray = Array.isArray(data) ? data : [data];
+      return buildParentMap(dataArray);
+    }, [data]);
+
     React.useEffect(() => {
-      const ids: string[] = [];
-      const dataArray = data instanceof Array ? data : [data];
+      const dataArray = Array.isArray(data) ? data : [data];
+      const idsSet = new Set<string>();
 
       function collectAllNodeIds(items: TreeDataItem[]) {
         items.forEach(item => {
           if (item.children && item.children.length > 0) {
-            ids.push(item.id);
+            idsSet.add(item.id);
             collectAllNodeIds(item.children);
           }
         });
@@ -116,11 +115,11 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
             return true;
           }
           if (item.children) {
-            ids.push(item.id);
+            idsSet.add(item.id);
             if (findPathToTarget(item.children, targetId)) {
               return true;
             }
-            ids.pop();
+            idsSet.delete(item.id);
           }
         }
         return false;
@@ -128,12 +127,17 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
 
       if (expandAll) {
         collectAllNodeIds(dataArray);
-        setExpandedItemIds(ids);
+        setExpandedItemIds(Array.from(idsSet));
       } else if (initialSelectedItemId) {
         findPathToTarget(dataArray, initialSelectedItemId);
-        setExpandedItemIds(ids);
+        setExpandedItemIds(Array.from(idsSet));
       }
     }, [data, expandAll, initialSelectedItemId]);
+
+    // [최적화: 부모 ID 찾기 - Map 조회 사용]
+    function getParentId(targetId: string): string | null {
+      return parentMap.get(targetId) ?? null;
+    }
 
     const handleSelectChange = React.useCallback(
       (item: TreeDataItem | undefined) => {
@@ -151,32 +155,27 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
 
     const handleDrop = React.useCallback(
       (targetItem: TreeDataItem) => {
-        if (draggedItem && onDocumentDrag && draggedItem.id !== targetItem.id) {
-          // [FIX] 리프(파일)에는 드롭 방지 (droppable 속성이 없거나, 루트 드롭이 아닌 경우)
-          if (targetItem.name !== 'parent_div' && !targetItem.droppable) {
-            setDraggedItem(null); // 드래그 종료
-            return;
-          }
+        setDraggedItem(null);
 
-          // [NEW] 드래그 앤 드롭 완료 후 관련 아코디언 펼치기
+        // Disallow dropping onto non-droppable, non-root items
+        if (draggedItem && onDocumentDrag && draggedItem.id !== targetItem.id && (targetItem.name === 'parent_div' || targetItem.droppable)) {
           setExpandedItemIds(prevExpanded => {
             const newExpanded = new Set(prevExpanded);
-            const dataArray = data instanceof Array ? data : [data];
 
-            // 1. 소스의 원래 부모 유지 (이미 펼쳐져 있던 상태 유지)
-            const sourceParentId = findParentId(dataArray, draggedItem.id);
+            // 1. Keep source's original parent expanded
+            const sourceParentId = getParentId(draggedItem.id);
             if (sourceParentId) {
               newExpanded.add(sourceParentId);
             }
 
-            // 2. 타겟이 폴더인 경우, 타겟 자체를 펼치기
+            // 2. Expand the target itself if droppable (excluding root)
             if (targetItem.name !== 'parent_div' && targetItem.droppable) {
               newExpanded.add(targetItem.id);
             }
 
-            // 3. 타겟의 부모도 펼치기 (타겟이 루트가 아닌 경우)
+            // 3. Expand the target's parent (if not root)
             if (targetItem.name !== 'parent_div') {
-              const targetParentId = findParentId(dataArray, targetItem.id);
+              const targetParentId = getParentId(targetItem.id);
               if (targetParentId) {
                 newExpanded.add(targetParentId);
               }
@@ -187,9 +186,8 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
 
           onDocumentDrag(draggedItem, targetItem);
         }
-        setDraggedItem(null);
       },
-      [draggedItem, onDocumentDrag, data]
+      [onDocumentDrag, parentMap, getParentId, draggedItem]
     );
 
     return (
@@ -200,7 +198,6 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
           selectedItemId={selectedItemId}
           handleSelectChange={handleSelectChange}
           expandedItemIds={expandedItemIds}
-          // [FIX] 컴포넌트 내부에서 import한 아이콘을 기본값으로 사용
           defaultLeafIcon={defaultLeafIcon || FileIcon}
           defaultNodeIcon={defaultNodeIcon || FolderIcon}
           handleDragStart={handleDragStart}
@@ -216,7 +213,6 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
             }
           }}
           onDrop={() => {
-            // [FIX] 루트 드롭 시 target 객체에 droppable: true 추가
             handleDrop({ id: '', name: 'parent_div', children: [], droppable: true });
           }}
         ></div>
@@ -262,7 +258,6 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {data.map(item => (
             <li key={item.id}>
-              {/* [FIX] 자식이 있는지 여부로 노드/리프 구분 (자식이 빈 배열이어도 노드임) */}
               {item.children ? (
                 <TreeNode
                   item={item}
@@ -327,12 +322,14 @@ const TreeNode = ({
   handleDrop?: (item: TreeDataItem) => void;
   draggedItem: TreeDataItem | null;
 }) => {
-  // [FIX] value 상태가 expandedItemIds prop의 변경을 동적으로 반영하도록 수정
-  const [isExpanded, setIsExpanded] = React.useState(expandedItemIds.includes(item.id));
+  // [최적화: Set을 사용한 빠른 includes]
+  const expandedSet = React.useMemo(() => new Set(expandedItemIds), [expandedItemIds]);
+  const [isExpanded, setIsExpanded] = React.useState(expandedSet.has(item.id));
   const [isDragOver, setIsDragOver] = React.useState(false);
 
   React.useEffect(() => {
-    setIsExpanded(expandedItemIds.includes(item.id));
+    setIsExpanded(expandedSet.has(item.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandedItemIds, item.id]);
 
   const onDragStart = (e: React.DragEvent) => {
@@ -347,7 +344,6 @@ const TreeNode = ({
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    // [FIX] droppable이 명시적으로 false가 아닌 경우 (true 또는 undefined) 드롭 허용
     if (item.droppable !== false && draggedItem && draggedItem.id !== item.id) {
       setIsDragOver(true);
     }
@@ -360,14 +356,12 @@ const TreeNode = ({
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    // [FIX] droppable하지 않은 노드에는 드롭 방지
     if (item.droppable === false) return;
     handleDrop?.(item);
     e.stopPropagation();
   };
 
   return (
-    // [FIX] Radix Accordion Root/Item을 React.useState로 제어하도록 변경
     <AccordionPrimitive.Root type="multiple" value={isExpanded ? [item.id] : []} onValueChange={value => setIsExpanded(value.includes(item.id))}>
       <AccordionPrimitive.Item value={item.id}>
         <AccordionTrigger
@@ -393,7 +387,7 @@ const TreeNode = ({
         </AccordionTrigger>
         <AccordionContent className="ml-6 border-l border-gray-200 pl-6 dark:border-gray-700">
           <TreeItem
-            data={item.children!} // TreeNode는 항상 children을 가짐
+            data={item.children!}
             selectedItemId={selectedItemId}
             handleSelectChange={handleSelectChange}
             expandedItemIds={expandedItemIds}
@@ -435,7 +429,6 @@ const TreeLeaf = React.forwardRef<
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    // [FIX] 리프(파일)는 기본적으로 드롭 불가. droppable: true가 명시된 경우에만 허용.
     if (item.droppable === true && !item.disabled && draggedItem && draggedItem.id !== item.id) {
       setIsDragOver(true);
     }
@@ -530,21 +523,18 @@ const TreeIcon = ({
   isSelected?: boolean;
   default?: React.ComponentType<{ className?: string }>;
 }) => {
-  let Icon = defaultIcon; // 1. Prop으로 받은 기본 아이콘
+  let Icon = defaultIcon;
 
-  // 2. 타입별 자동 매칭 아이콘
   if (!item.icon && item.type) {
     if (item.type === 'Text') Icon = Type;
     else if (item.type === 'Media') Icon = Image;
     else if (item.type === 'JSON') Icon = FileJson;
   }
 
-  // 3. 사용자 정의 아이콘 (최우선)
   if (isSelected && item.selectedIcon) Icon = item.selectedIcon;
   else if (isOpen && item.openIcon) Icon = item.openIcon;
   else if (item.icon) Icon = item.icon;
 
-  // 4. Prop이나 타입으로 매칭된 아이콘이 없으면, 내부 기본값 사용
   if (!Icon) {
     Icon = item.children ? FolderIcon : FileIcon;
   }
@@ -556,5 +546,4 @@ const TreeActions = ({ children }: { children: React.ReactNode; isSelected: bool
   return <div className={cn('ml-auto')}>{children}</div>;
 };
 
-// [FIX] TreeView와 TreeDataItem 타입을 named export 합니다.
 export { TreeView };

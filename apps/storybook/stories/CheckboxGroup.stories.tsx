@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { BellIcon, CloudIcon, LockIcon, MailIcon, ShieldIcon, UserIcon } from 'lucide-react';
 import React from 'react';
 
+import { CustomDocsPage } from '../src/components/CustomDocsPage';
 import { CheckboxGroup } from '../src/components/ui/checkbox';
 
 const meta = {
@@ -10,81 +11,14 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: `데이터에서 여러 체크박스를 렌더링하는 유연하고 확장 가능한 체크박스 그룹 컴포넌트입니다.
+      page: () => (
+        <CustomDocsPage
+          componentName="CheckboxGroup"
+          description="데이터에서 여러 체크박스를 렌더링하는 유연하고 확장 가능한 체크박스 그룹 컴포넌트입니다."
+          installationDeps={['@radix-ui/react-checkbox', 'lucide-react', 'clsx', 'tailwind-merge']}
+          implementationCode={`'use client';
 
-## 컴포넌트 구현
-
-CheckboxGroup 컴포넌트는 데이터 기반으로 체크박스들을 동적으로 렌더링합니다:
-
-### 주요 컴포넌트
-- \`Checkbox\` - Radix UI 기반의 개별 체크박스 컴포넌트
-- \`CheckboxGroup\` - 여러 체크박스를 관리하는 그룹 컴포넌트
-
-### 주요 기능
-- **데이터 기반 렌더링**: 옵션 배열만 전달하면 자동으로 체크박스 생성
-- **다양한 레이아웃**: 수직, 수평, 그리드 레이아웃 지원
-- **아이콘 지원**: 각 체크박스에 아이콘 추가 가능
-- **상태 관리**: 제어형/비제어형 상태 관리 모두 지원
-- **접근성**: 완전한 키보드 내비게이션 및 스크린 리더 지원
-- **유연한 스타일링**: Tailwind CSS 클래스를 통한 커스터마이징
-        `,
-      },
-    },
-  },
-  tags: ['autodocs'],
-  argTypes: {
-    options: {
-      description: '렌더링할 체크박스 옵션 배열',
-    },
-    value: {
-      control: { type: 'object' },
-      description: '제어형 값 배열',
-    },
-    defaultValue: {
-      control: { type: 'object' },
-      description: '기본 선택된 값들',
-    },
-    orientation: {
-      control: { type: 'select' },
-      options: ['vertical', 'horizontal'],
-      description: '레이아웃 방향',
-    },
-    columns: {
-      control: { type: 'number' },
-      description: '그리드 레이아웃의 열 수',
-    },
-    title: {
-      control: { type: 'text' },
-      description: '그룹 제목',
-    },
-    description: {
-      control: { type: 'text' },
-      description: '그룹 설명',
-    },
-    required: {
-      control: { type: 'boolean' },
-      description: '필수 필드로 표시',
-    },
-    disabled: {
-      control: { type: 'boolean' },
-      description: '모든 체크박스 비활성화',
-    },
-  },
-} satisfies Meta<typeof CheckboxGroup>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-// 1. 완전한 구현코드
-export const CheckboxImplementation: Story = {
-  args: { options: [] },
-  render: () => <h3 className="mb-4 text-lg font-semibold">완전한 CheckboxGroup 구현 코드</h3>,
-  parameters: {
-    docs: {
-      source: {
-        language: 'tsx',
-        code: `import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon } from 'lucide-react';
 import * as React from 'react';
 
@@ -204,123 +138,75 @@ function CheckboxGroup({
   );
 }
 
-export { Checkbox, CheckboxGroup };
-export type { CheckboxGroupProps, CheckboxOption };`,
-      },
-    },
-  },
-};
-
-// 2. 유틸리티 함수
-export const UtilsImplementation: Story = {
-  args: { options: [] },
-  render: () => <h3 className="mb-4 text-lg font-semibold">유틸리티 함수</h3>,
-  parameters: {
-    docs: {
+export { CheckboxGroup };
+export type { CheckboxGroupProps, CheckboxOption };`}
+        />
+      ),
       description: {
-        story: 'clsx와 tailwind-merge를 사용하여 Tailwind CSS 클래스를 병합하는 유틸리티 함수입니다.',
-      },
-      source: {
-        language: 'tsx',
-        code: `import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+        component: `데이터에서 여러 체크박스를 렌더링하는 유연하고 확장 가능한 체크박스 그룹 컴포넌트입니다.
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}`,
-      },
-    },
-  },
-};
+## 컴포넌트 구현
 
-// 3. 설치 및 설정
-export const InstallationGuide: Story = {
-  args: { options: [] },
-  render: () => (
-    <div className="max-w-4xl space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">설치 및 설정</h3>
+CheckboxGroup 컴포넌트는 데이터 기반으로 체크박스들을 동적으로 렌더링합니다:
 
-        <div className="space-y-3">
-          <h4 className="font-medium">1. 필수 의존성 패키지 설치</h4>
-          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
-            <p className="font-mono text-sm">npm install @radix-ui/react-checkbox lucide-react clsx tailwind-merge</p>
-            <p className="mt-1 font-mono text-sm">또는</p>
-            <p className="font-mono text-sm">pnpm add @radix-ui/react-checkbox lucide-react clsx tailwind-merge</p>
-          </div>
-        </div>
+### 주요 컴포넌트
+- \`Checkbox\` - Radix UI 기반의 개별 체크박스 컴포넌트
+- \`CheckboxGroup\` - 여러 체크박스를 관리하는 그룹 컴포넌트
 
-        <div className="space-y-3">
-          <h4 className="font-medium">2. 프로젝트에 추가하기</h4>
-          <ul className="ml-4 space-y-1 text-sm">
-            <li>• checkbox.tsx 컴포넌트를 src/components/ui/ 폴더에 복사</li>
-            <li>• utils.ts 파일을 src/lib/ 폴더에 복사</li>
-            <li>• 프로젝트에 Tailwind CSS가 설정되어 있는지 확인</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'CheckboxGroup 컴포넌트 구현을 위한 의존성 패키지 및 설정 방법입니다.',
-      },
-      source: {
-        language: 'tsx',
-        code: `// 기본 사용법
-import { CheckboxGroup } from '@/components/ui/checkbox';
-
-const options = [
-  { id: 'email', label: '이메일 알림', value: 'email' },
-  { id: 'sms', label: 'SMS 알림', value: 'sms' },
-  { id: 'push', label: '푸시 알림', value: 'push' },
-];
-
-<CheckboxGroup
-  title="알림 설정"
-  options={options}
-  defaultValue={['email']}
-/>
-
-// 제어형 사용법
-const [selectedValues, setSelectedValues] = useState(['email']);
-<CheckboxGroup
-  title="알림 설정"
-  options={options}
-  value={selectedValues}
-  onValueChange={setSelectedValues}
-/>
-
-// 그리드 레이아웃
-<CheckboxGroup
-  title="기능 선택"
-  columns={2}
-  options={options}
-/>
-
-// 아이콘과 설명 포함
-const optionsWithIcons = [
-  {
-    id: 'profile',
-    label: '프로필 공개',
-    value: 'profile',
-    description: '다른 사용자에게 프로필을 공개합니다',
-    icon: <UserIcon className="h-4 w-4" />,
-  },
-];
-
-<CheckboxGroup
-  title="계정 설정"
-  description="계정 기본 설정을 구성하세요"
-  required
-  options={optionsWithIcons}
-/>`,
+### 주요 기능
+- **데이터 기반 렌더링**: 옵션 배열만 전달하면 자동으로 체크박스 생성
+- **다양한 레이아웃**: 수직, 수평, 그리드 레이아웃 지원
+- **아이콘 지원**: 각 체크박스에 아이콘 추가 가능
+- **상태 관리**: 제어형/비제어형 상태 관리 모두 지원
+- **접근성**: 완전한 키보드 내비게이션 및 스크린 리더 지원
+- **유연한 스타일링**: Tailwind CSS 클래스를 통한 커스터마이징
+        `,
       },
     },
   },
-};
+  tags: ['autodocs'],
+  argTypes: {
+    options: {
+      description: '렌더링할 체크박스 옵션 배열',
+    },
+    value: {
+      control: { type: 'object' },
+      description: '제어형 값 배열',
+    },
+    defaultValue: {
+      control: { type: 'object' },
+      description: '기본 선택된 값들',
+    },
+    orientation: {
+      control: { type: 'select' },
+      options: ['vertical', 'horizontal'],
+      description: '레이아웃 방향',
+    },
+    columns: {
+      control: { type: 'number' },
+      description: '그리드 레이아웃의 열 수',
+    },
+    title: {
+      control: { type: 'text' },
+      description: '그룹 제목',
+    },
+    description: {
+      control: { type: 'text' },
+      description: '그룹 설명',
+    },
+    required: {
+      control: { type: 'boolean' },
+      description: '필수 필드로 표시',
+    },
+    disabled: {
+      control: { type: 'boolean' },
+      description: '모든 체크박스 비활성화',
+    },
+  },
+} satisfies Meta<typeof CheckboxGroup>;
 
+export default meta;
+type Story = StoryObj<typeof meta>;
 // 4. 예시들
 // 기본 예시
 export const Default: Story = {
@@ -334,6 +220,33 @@ export const Default: Story = {
       { id: 'marketing', label: '마케팅 이메일', value: 'marketing' },
     ],
     defaultValue: ['email'],
+  },
+};
+
+// 1. 설치 및 설정
+export const InstallationGuide: Story = {
+  args: { options: [] },
+  render: () => <div />,
+  parameters: {
+    docs: { disable: true },
+  },
+};
+
+// 2. 완전한 구현코드
+export const CheckboxImplementation: Story = {
+  args: { options: [] },
+  render: () => <div />,
+  parameters: {
+    docs: { disable: true },
+  },
+};
+
+// 3. 유틸리티 함수
+export const UtilsImplementation: Story = {
+  args: { options: [] },
+  render: () => <div />,
+  parameters: {
+    docs: { disable: true },
   },
 };
 

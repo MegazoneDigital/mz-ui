@@ -4,6 +4,7 @@ import React from 'react';
 
 import { CustomDocsPage } from '../src/components/CustomDocsPage';
 import { CheckboxGroup } from '../src/components/ui/checkbox';
+import { checkboxGroupDependencies, checkboxGroupImplementationCode } from '../src/constants/checkboxGroup';
 
 const meta = {
   title: 'ShadcnUI/CheckboxGroup',
@@ -15,131 +16,8 @@ const meta = {
         <CustomDocsPage
           componentName="CheckboxGroup"
           description="데이터에서 여러 체크박스를 렌더링하는 유연하고 확장 가능한 체크박스 그룹 컴포넌트입니다."
-          installationDeps={['@radix-ui/react-checkbox', 'lucide-react', 'clsx', 'tailwind-merge']}
-          implementationCode={`'use client';
-
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { CheckIcon } from 'lucide-react';
-import * as React from 'react';
-
-import { cn } from '@/lib/utils';
-
-function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
-  return (
-    <CheckboxPrimitive.Root
-      data-slot="checkbox"
-      className={cn(
-        'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-        className
-      )}
-      {...props}
-    >
-      <CheckboxPrimitive.Indicator data-slot="checkbox-indicator" className="grid place-content-center text-current transition-none">
-        <CheckIcon className="size-3.5" />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-  );
-}
-
-// 체크박스 그룹을 위한 타입 정의
-interface CheckboxOption {
-  id: string;
-  label: string;
-  value: string;
-  description?: string;
-  disabled?: boolean;
-  icon?: React.ReactNode;
-}
-
-interface CheckboxGroupProps {
-  options: CheckboxOption[];
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
-  orientation?: 'horizontal' | 'vertical';
-  columns?: number;
-  title?: string;
-  description?: string;
-  required?: boolean;
-  className?: string;
-  disabled?: boolean;
-}
-
-function CheckboxGroup({
-  options,
-  value,
-  defaultValue = [],
-  onValueChange,
-  orientation = 'vertical',
-  columns,
-  title,
-  description,
-  required = false,
-  className,
-  disabled = false,
-}: CheckboxGroupProps) {
-  const [internalValue, setInternalValue] = React.useState<string[]>(defaultValue);
-  const currentValue = value ?? internalValue;
-
-  const handleValueChange = (optionValue: string, checked: boolean) => {
-    const newValue = checked ? [...currentValue, optionValue] : currentValue.filter(v => v !== optionValue);
-
-    if (value === undefined) {
-      setInternalValue(newValue);
-    }
-    onValueChange?.(newValue);
-  };
-
-  const gridClass = columns ? \`grid grid-cols-\${columns} gap-4\` : orientation === 'horizontal' ? 'flex flex-wrap gap-4' : 'space-y-3';
-
-  return (
-    <div className={cn('space-y-3', className)}>
-      {title && (
-        <div className="space-y-1">
-          <h3 className="text-sm leading-none font-medium">
-            {title}
-            {required && <span className="text-destructive ml-1">*</span>}
-          </h3>
-          {description && <p className="text-muted-foreground text-sm">{description}</p>}
-        </div>
-      )}
-
-      <div className={gridClass}>
-        {options.map(option => {
-          const isChecked = currentValue.includes(option.value);
-          const isDisabled = disabled || option.disabled;
-
-          return (
-            <div key={option.id} className="flex items-start space-x-2">
-              <Checkbox
-                id={option.id}
-                checked={isChecked}
-                disabled={isDisabled}
-                onCheckedChange={checked => handleValueChange(option.value, checked as boolean)}
-              />
-              <div className="grid gap-1.5 leading-none">
-                <label
-                  htmlFor={option.id}
-                  className={cn(
-                    'flex items-center gap-2 text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-                    isDisabled && 'cursor-not-allowed opacity-70'
-                  )}
-                >
-                  {option.icon && <span className="flex-shrink-0">{option.icon}</span>}
-                  {option.label}
-                </label>
-                {option.description && <p className="text-muted-foreground text-xs">{option.description}</p>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-export { CheckboxGroup };
-export type { CheckboxGroupProps, CheckboxOption };`}
+          installationDeps={checkboxGroupDependencies}
+          implementationCode={checkboxGroupImplementationCode}
         />
       ),
       description: {
@@ -159,7 +37,6 @@ CheckboxGroup 컴포넌트는 데이터 기반으로 체크박스들을 동적�
 - **아이콘 지원**: 각 체크박스에 아이콘 추가 가능
 - **상태 관리**: 제어형/비제어형 상태 관리 모두 지원
 - **접근성**: 완전한 키보드 내비게이션 및 스크린 리더 지원
-- **유연한 스타일링**: Tailwind CSS 클래스를 통한 커스터마이징
         `,
       },
     },
@@ -207,7 +84,7 @@ CheckboxGroup 컴포넌트는 데이터 기반으로 체크박스들을 동적�
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-// 4. 예시들
+
 // 기본 예시
 export const Default: Story = {
   args: {
@@ -220,33 +97,6 @@ export const Default: Story = {
       { id: 'marketing', label: '마케팅 이메일', value: 'marketing' },
     ],
     defaultValue: ['email'],
-  },
-};
-
-// 1. 설치 및 설정
-export const InstallationGuide: Story = {
-  args: { options: [] },
-  render: () => <div />,
-  parameters: {
-    docs: { disable: true },
-  },
-};
-
-// 2. 완전한 구현코드
-export const CheckboxImplementation: Story = {
-  args: { options: [] },
-  render: () => <div />,
-  parameters: {
-    docs: { disable: true },
-  },
-};
-
-// 3. 유틸리티 함수
-export const UtilsImplementation: Story = {
-  args: { options: [] },
-  render: () => <div />,
-  parameters: {
-    docs: { disable: true },
   },
 };
 

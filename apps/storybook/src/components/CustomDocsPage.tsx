@@ -1,6 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controls, Description, Primary, Stories, Subtitle, Title } from '@storybook/blocks';
-import { BookOpen, Library, Package, Settings, Sliders, Sparkles, Wrench } from 'lucide-react';
+import {
+  ArrowUp, // 스크롤 버튼 아이콘
+  BookOpen,
+  Library,
+  Package,
+  Settings,
+  Sliders,
+  Sparkles,
+  Wrench,
+} from 'lucide-react';
 import React from 'react';
 
 interface Section {
@@ -36,6 +45,7 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // --- Original CodeBlock Component (Restored) ---
   const CodeBlock = ({ code }: { code: string; language?: string }) => {
     const [copied, setCopied] = React.useState(false);
 
@@ -92,14 +102,15 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
       title: '컴포넌트 설명',
       icon: BookOpen,
       content: (
-        <div className="rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-900/20 dark:to-indigo-900/20">
+        // Use a standard, clean card
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <Description />
-          <div className="mt-6 rounded-lg border border-blue-200 bg-white/50 p-4 dark:border-blue-700 dark:bg-gray-800/50">
+          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/30">
             <Primary />
-            <div className="mt-4 border-t border-blue-200 pt-4 dark:border-blue-700">
+            <div className="mt-4 border-t border-gray-200 pt-4 dark:border-zinc-700">
               <div className="mb-2 flex items-center gap-2">
-                <Sliders className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <h4 className="font-semibold text-blue-900 dark:text-blue-200">실시간 테스트</h4>
+                <Sliders className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <h4 className="font-semibold text-gray-800 dark:text-gray-200">실시간 테스트</h4>
               </div>
               <Controls />
             </div>
@@ -112,21 +123,20 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
       title: '설치방법',
       icon: Package,
       content: (
-        <div className="space-y-6">
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-700 dark:bg-emerald-900/20">
-            <Tabs defaultValue="npm" className="w-full">
-              <TabsList variant="underline" className="mb-4">
-                <TabsTrigger value="npm">NPM</TabsTrigger>
-                <TabsTrigger value="pnpm">PNPM</TabsTrigger>
-              </TabsList>
-              <TabsContent value="npm">
-                <CodeBlock code={`npm install ${installationDeps.join(' ')}`} />
-              </TabsContent>
-              <TabsContent value="pnpm">
-                <CodeBlock code={`pnpm add ${installationDeps.join(' ')}`} />
-              </TabsContent>
-            </Tabs>
-          </div>
+        // Use a standard, clean card
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+          <Tabs defaultValue="npm" className="w-full">
+            <TabsList variant="underline" className="mb-4">
+              <TabsTrigger value="npm">NPM</TabsTrigger>
+              <TabsTrigger value="pnpm">PNPM</TabsTrigger>
+            </TabsList>
+            <TabsContent value="npm">
+              <CodeBlock code={`npm install ${installationDeps.join(' ')}`} />
+            </TabsContent>
+            <TabsContent value="pnpm">
+              <CodeBlock code={`pnpm add ${installationDeps.join(' ')}`} />
+            </TabsContent>
+          </Tabs>
         </div>
       ),
     },
@@ -135,13 +145,12 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
       title: '완벽한 구현코드',
       icon: Settings,
       content: implementationCode ? (
+        // Use a standard card with an accent border
         <div className="space-y-4">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-xl border border-l-4 border-gray-200 border-green-500 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-green-100 p-2 dark:bg-green-900">
-                  <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </span>
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
                 <span className="font-semibold text-gray-900 dark:text-gray-100">완전한 TypeScript 구현 코드</span>
               </div>
             </div>
@@ -152,7 +161,7 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
           <div className="text-center text-gray-500 dark:text-gray-400">
             <div className="mb-2 text-4xl">📄</div>
             <p>구현 코드는 예시 섹션에서 확인할 수 있습니다.</p>
@@ -165,18 +174,17 @@ export function CustomDocsPage({ installationDeps, implementationCode, utilityCo
       title: '유틸리티 함수',
       icon: Wrench,
       content: (
+        // Use a standard card with an accent border
         <div className="space-y-4">
-          <div className="rounded-lg border border-orange-200 bg-orange-50 p-6 dark:border-orange-700 dark:bg-orange-900/20">
+          <div className="rounded-xl border border-l-4 border-gray-200 border-orange-500 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-orange-100 p-2 dark:bg-orange-900">
-                  <Wrench className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                </span>
+              <div className="flex items-center gap-2.5">
+                <Wrench className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                 <span className="font-semibold text-orange-800 dark:text-orange-200">필수 유틸리티 함수 (cn)</span>
               </div>
             </div>
 
-            <div className="mb-4 text-sm text-orange-700 dark:text-orange-300">
+            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
               <p>Tailwind CSS 클래스를 안전하게 병합하는 유틸리티 함수입니다.</p>
             </div>
 
@@ -202,14 +210,14 @@ export function cn(...inputs: ClassValue[]) {
   return (
     <div className="custom-docs-page">
       {/* Header */}
-      <div className="docs-header mb-8 border-b-2 border-gray-200 pb-8 dark:border-gray-700">
+      <div className="docs-header mb-6 border-b border-gray-200 pb-6 dark:border-zinc-800">
         <Title />
         <Subtitle />
       </div>
 
       {/* Tabs Navigation */}
       <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList variant="underline" className="mb-8 w-full justify-start">
+        <TabsList variant="underline" className="mb-6 w-full justify-start">
           {sections.map(section => {
             const IconComponent = section.icon;
             return (
@@ -229,9 +237,9 @@ export function cn(...inputs: ClassValue[]) {
         {sections.map(section => (
           <TabsContent key={section.id} value={section.id} className="mt-0">
             <div className="docs-section">
-              <div className="mb-8">
-                <h2 className="mb-4 flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {section.icon && <section.icon className="h-6 w-6 text-gray-600 dark:text-gray-400" />}
+              <div className="mb-6">
+                <h2 className="mb-4 flex items-center gap-3 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  {section.icon && <section.icon className="h-6 w-6 text-gray-500 dark:text-gray-400" />}
                   {section.title}
                 </h2>
               </div>
@@ -243,9 +251,9 @@ export function cn(...inputs: ClassValue[]) {
         {/* Empty Examples Tab Content */}
         <TabsContent value="examples" className="mt-0">
           <div className="docs-section">
-            <div className="mb-8">
-              <h2 className="mb-4 flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                <Library className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            <div className="mb-6">
+              <h2 className="mb-4 flex items-center gap-3 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                <Library className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                 모든 예시
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
@@ -273,7 +281,7 @@ export function cn(...inputs: ClassValue[]) {
         }}
         aria-hidden={activeTab !== 'examples'}
       >
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <Stories />
         </div>
       </div>
@@ -285,27 +293,31 @@ export function cn(...inputs: ClassValue[]) {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed right-8 bottom-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-gray-700 text-white shadow-lg transition-all hover:scale-110 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500"
+          className="fixed right-8 bottom-8 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-gray-800 text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white"
           aria-label="맨 위로 이동"
         >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-          </svg>
+          <ArrowUp className="h-5 w-5" />
         </button>
       )}
 
+      {/* --- Refined Embedded Styles --- */}
       <style>{`
         .custom-docs-page {
-          max-width: 1200px;
+          max-width: 1100px;
           margin: 0 auto;
-          padding: 2rem;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
+          padding: 2.5rem 2rem;
+          font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.7;
+          color: rgb(24 24 27);
+        }
+        
+        .dark .custom-docs-page {
+           color: rgb(229 229 229);
         }
 
         .docs-section {
           scroll-margin-top: 2rem;
-          margin-top: 3rem;
+          margin-top: 2rem; /* Reduced from 3rem */
         }
 
         .section-content {
@@ -344,7 +356,11 @@ export function cn(...inputs: ClassValue[]) {
 
         @media (max-width: 768px) {
           .custom-docs-page {
-            padding: 1rem;
+            padding: 1.5rem 1rem;
+          }
+          .docs-header {
+             padding-bottom: 1.5rem;
+             margin-bottom: 1.5rem;
           }
         }
       `}</style>
